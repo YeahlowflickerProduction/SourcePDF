@@ -6,15 +6,17 @@ import QtQuick.Dialogs 1.3
 
 //  Main window
 ApplicationWindow {
-    property string app_version : "2021.D1.0.1"
+    property string app_version : "2021.D1.1.0"
 
     property int scale_percentage : 75
     property string current_file : ""
     property bool selected: false
     property int xPos: 0
 
+    property variant save_dialog
     property variant unsaved_warn
     property variant about
+
     property bool saved: true
     property string save_path: ""
 
@@ -34,8 +36,8 @@ ApplicationWindow {
             title: "File"
             Action { text: "New"; onTriggered: { new_pdf() } }
             Action { text: "Open"; onTriggered: { pdfDialog.mode = 4; pdfDialog.open() } }
-            Action { text: "Save"; enabled: has_pages(); onTriggered: { save_pdf() } }
-            Action { text: "Save As"; enabled: has_pages(); onTriggered: { save_pdf(true) } }
+            Action { text: "Save"; enabled: has_pages(); onTriggered: { triggerSaveDialog(true) } }
+            Action { text: "Save As"; enabled: has_pages(); onTriggered: { triggerSaveDialog(false) } }
             MenuSeparator { }
             Action { text: "Exit"; onTriggered: { exitApplication() } }
         }
@@ -116,35 +118,6 @@ ApplicationWindow {
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.minimumSize: 0.1
 
-        MouseArea {
-            anchors.fill: parent
-            propagateComposedEvents: true
-            property int moveSpeed: 50
-
-            onWheel: {
-                //  Horizontal scroll if shift modifiers. Very weird values but works
-                if (wheel.modifiers == Qt.ShiftModifier) {
-                    if (wheel.angleDelta.y > 0 && xPos < 100)
-                        xPos += 10;
-                    else if (wheel.angleDelta.y < 0 && xPos > -100)
-                        xPos -= 10;
-                }
-                //  Zoom in or out if control modifiers
-                else if (wheel.modifiers == Qt.ControlModifier) {
-                    if (wheel.angleDelta.y > 0 && scale_percentage < 200)
-                        scale_percentage += 25;
-                    else if (wheel.angleDelta.y < 0 && scale_percentage > 25)
-                        scale_percentage -= 25;
-                    control.value = scale_percentage / 25;
-                }
-                //  Vertical scroll, otherwise
-                else
-                    listview.contentY -= wheel.angleDelta.y > 0 ? moveSpeed : -moveSpeed;
-                listview.returnToBounds();
-            }
-        }
-
-
         ListView {
             id: listview
             anchors.fill: parent
@@ -195,6 +168,34 @@ ApplicationWindow {
                     }
                 }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            propagateComposedEvents: true
+            property int moveSpeed: 50
+
+            onWheel: {
+                //  Horizontal scroll if shift modifiers. Very weird values but works
+                if (wheel.modifiers == Qt.ShiftModifier) {
+                    if (wheel.angleDelta.y > 0 && xPos < 100)
+                        xPos += 10;
+                    else if (wheel.angleDelta.y < 0 && xPos > -100)
+                        xPos -= 10;
+                }
+                //  Zoom in or out if control modifiers
+                else if (wheel.modifiers == Qt.ControlModifier) {
+                    if (wheel.angleDelta.y > 0 && scale_percentage < 200)
+                        scale_percentage += 25;
+                    else if (wheel.angleDelta.y < 0 && scale_percentage > 25)
+                        scale_percentage -= 25;
+                    control.value = scale_percentage / 25;
+                }
+                //  Vertical scroll, otherwise
+                else
+                    listview.contentY -= wheel.angleDelta.y > 0 ? moveSpeed : -moveSpeed;
+                listview.returnToBounds();
+            }
+        }
     }
 
 
@@ -226,25 +227,6 @@ ApplicationWindow {
             selected = false;
             if (pdfDialog.mode != 4)
                 saved = false;
-            this.close();
-        }
-
-        onRejected: this.close();
-    }
-
-
-    //  PDF Save Dialog
-    FileDialog {
-        id: saveDialog
-        title: "Choose save location"
-        nameFilters: [ "PDF files (*.pdf)" ]
-        selectExisting: false
-
-        onAccepted: {
-            var path = saveDialog.fileUrl.toString().replace('file://', '');
-            manager.save_pdf(path);
-            save_path = path;
-            saved = true;
             this.close();
         }
 
@@ -328,13 +310,22 @@ ApplicationWindow {
     }
 
 
-    function save_pdf(force_dialog) {
-        if (save_path != "" && force_dialog) {
-            manager.save_pdf(save_path);
-            saved = true;
+    function handler_save_pdf(path, compression) {
+        manager.save_pdf(path, compression);
+        root.save_path = path;
+        root.saved = true;
+    }
+
+
+    function triggerSaveDialog(allow_skip_dialog) {
+        if (root.save_path != "" && allow_skip_dialog) {
+            handler_save_pdf(root.save_path);
+            return;
         }
-        else
-            saveDialog.open();
+        var component = Qt.createComponent("./save_dialog.qml");
+        save_dialog = component.createObject(root);
+        save_dialog.show();
+        save_dialog.raise();
     }
 
 

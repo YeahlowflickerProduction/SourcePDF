@@ -45,16 +45,35 @@ class Main(QObject):
 
 
 
-    @Slot(str)
-    def save_pdf(self, path):
+    @Slot(str, int)
+    def save_pdf(self, path, compression):
+        temp = f'{ROOT_DIR}/temp/result.pdf'
+
+        quality = {
+            0: '/default',
+            1: '/prepress',
+            2: '/printer',
+            3: '/ebook',
+            4: '/screen'
+        }
+
         pdf_writer = PdfFileWriter()
 
         for p in self.pages:
             pdf = PdfFileReader(p.replace('file://', ''))
             pdf_writer.addPage(pdf.getPage(0))
 
-        with open(path, 'wb') as stream:
+        with open(temp, 'wb') as stream:
             pdf_writer.write(stream)
+
+        import sys
+        import subprocess
+        subprocess.call(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4',
+                '-dPDFSETTINGS={}'.format(quality[compression]),
+                '-dNOPAUSE', '-dQUIET', '-dBATCH',
+                '-sOutputFile={}'.format(path),
+                 temp
+                 ])
 
 
     @Slot(result=int)
@@ -85,7 +104,9 @@ class Main(QObject):
         for p in range(pdf.numPages):
             pdf = PdfFileReader(path)   # This line is redundant, but prevents stream error
             pdf_writer = PdfFileWriter()
-            pdf_writer.addPage(pdf.getPage(p))
+            page = pdf.getPage(p)
+            page.compressContentStreams()
+            pdf_writer.addPage(page)
             _path = rf'{temp}/{self.doc_count}_page{p}.pdf'
             with open(_path, 'wb') as stream:
                 pdf_writer.write(stream)
