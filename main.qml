@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 
 //  Main window
 ApplicationWindow {
-    property string app_version : "2021.D1.1.0"
+    property string app_version : "2021.D1.1.2"
 
     property int scale_percentage : 75
     property string current_file : ""
@@ -133,6 +133,38 @@ ApplicationWindow {
 
             boundsBehavior: Flickable.StopAtBounds
 
+
+            MouseArea {
+                anchors.fill: parent
+                propagateComposedEvents: true
+                property int moveSpeed: 50
+
+                onWheel: {
+                    //  Horizontal scroll if shift modifiers. Very weird values but works
+                    if (wheel.modifiers == Qt.ShiftModifier) {
+                        if (wheel.angleDelta.y > 0 && xPos < 100)
+                            xPos += 10;
+                        else if (wheel.angleDelta.y < 0 && xPos > -100)
+                            xPos -= 10;
+                    }
+                    //  Zoom in or out if control modifiers
+                    else if (wheel.modifiers == Qt.ControlModifier) {
+                        if (wheel.angleDelta.y > 0 && scale_percentage < 200)
+                            scale_percentage += 25;
+                        else if (wheel.angleDelta.y < 0 && scale_percentage > 25)
+                            scale_percentage -= 25;
+                        control.value = scale_percentage / 25;
+                    }
+                    //  Vertical scroll, otherwise
+                    else {
+                        if (wheel.angleDelta.y > 0) listview.contentY -= moveSpeed;
+                        else if (wheel.angleDelta.y < 0) listview.contentY += moveSpeed;
+                    }
+                    listview.returnToBounds();
+                }
+            }
+
+
             delegate:
                 Rectangle {
                     width: listview.contentWidth
@@ -168,34 +200,6 @@ ApplicationWindow {
                     }
                 }
         }
-
-        MouseArea {
-            anchors.fill: parent
-            propagateComposedEvents: true
-            property int moveSpeed: 50
-
-            onWheel: {
-                //  Horizontal scroll if shift modifiers. Very weird values but works
-                if (wheel.modifiers == Qt.ShiftModifier) {
-                    if (wheel.angleDelta.y > 0 && xPos < 100)
-                        xPos += 10;
-                    else if (wheel.angleDelta.y < 0 && xPos > -100)
-                        xPos -= 10;
-                }
-                //  Zoom in or out if control modifiers
-                else if (wheel.modifiers == Qt.ControlModifier) {
-                    if (wheel.angleDelta.y > 0 && scale_percentage < 200)
-                        scale_percentage += 25;
-                    else if (wheel.angleDelta.y < 0 && scale_percentage > 25)
-                        scale_percentage -= 25;
-                    control.value = scale_percentage / 25;
-                }
-                //  Vertical scroll, otherwise
-                else
-                    listview.contentY -= wheel.angleDelta.y > 0 ? moveSpeed : -moveSpeed;
-                listview.returnToBounds();
-            }
-        }
     }
 
 
@@ -208,7 +212,7 @@ ApplicationWindow {
 
         onAccepted: {
             current_file = pdfDialog.fileUrl.toString()
-            var path = pdfDialog.fileUrl.toString().replace('file://', '');
+            var path = pdfDialog.fileUrl.toString();
 
             var index = listview.currentIndex;
             if (pdfDialog.mode == 4)

@@ -3,6 +3,9 @@ from PySide2.QtCore import Qt, QCoreApplication
 from PySide2.QtWidgets import QApplication
 from PySide2.QtQml import QQmlApplicationEngine
 from main import Main
+from os import path
+
+ROOT_DIR = path.dirname(path.abspath(__file__))
 
 if __name__ == "__main__":
 
@@ -17,7 +20,7 @@ if __name__ == "__main__":
     #   Define engine
     from os.path import dirname, abspath
     engine = QQmlApplicationEngine()
-    engine.load("/mnt/YFP/SourcePDF/main.qml")
+    engine.load(f'{ROOT_DIR}/main.qml')
 
     #   Define Main
     manager = Main(engine)

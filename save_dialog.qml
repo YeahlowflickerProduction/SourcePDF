@@ -85,7 +85,7 @@ Window {
         selectExisting: false
 
         onAccepted: {
-            save_dialog.path = `${save_file_dialog.fileUrl}.pdf`.replace('file://', '');
+            save_dialog.path = `${save_file_dialog.fileUrl}.pdf`;
             this.close();
         }
 
