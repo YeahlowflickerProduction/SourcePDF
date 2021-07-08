@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 
 //  Main window
 ApplicationWindow {
-    property string app_version : "2021.D1.1.1"
+    property string app_version : "2021.D1.1.2"
 
     property int scale_percentage : 75
     property string current_file : ""
@@ -211,7 +211,6 @@ ApplicationWindow {
         nameFilters: [ "PDF files (*.pdf)" ]
 
         onAccepted: {
-            current_file = pdfDialog.fileUrl.toString()
             var path = pdfDialog.fileUrl.toString();
 
             var index = listview.currentIndex;
@@ -246,8 +245,7 @@ ApplicationWindow {
         nameFilters: [ "Image files (*.jpg *.jepg *.png)" ]
 
         onAccepted: {
-            current_file = imageDialog.fileUrl.toString()
-            var path = imageDialog.fileUrl.toString().replace('file://', '');
+            var path = imageDialog.fileUrl.toString();
 
             var index = listview.currentIndex;
             listview.model = manager.add_image(path, imageDialog.mode, index);

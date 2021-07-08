@@ -24,21 +24,21 @@ class Main(QObject):
 
 
     @Slot(str, result=list)
-    def open_file(self, path):
+    def open_file(self, filepath):
         temp = f'{ROOT_DIR}/temp'
 
         self.clear_temp()
 
-        pdf = PdfFileReader(remove_prefix(path))
+        pdf = PdfFileReader(remove_prefix(filepath))
 
         for p in range(pdf.numPages):
-            pdf = PdfFileReader(remove_prefix(path))   # This line is redundant, but prevents stream error
+            pdf = PdfFileReader(remove_prefix(filepath))   # This line is redundant, but prevents stream error
             pdf_writer = PdfFileWriter()
             pdf_writer.addPage(pdf.getPage(p))
-            _path = rf'{temp}/{self.doc_count}_page{p}.pdf'
-            with open(_path, 'wb') as stream:
+            _filepath = rf'{temp}/{self.doc_count}_page{p}.pdf'
+            with open(_filepath, 'wb') as stream:
                 pdf_writer.write(stream)
-            self.pages.append(add_prefix(_path))
+            self.pages.append(add_prefix(_filepath))
         self.doc_count = 1
 
         return self.pages
@@ -46,7 +46,7 @@ class Main(QObject):
 
 
     @Slot(str, int)
-    def save_pdf(self, path, compression):
+    def save_pdf(self, filepath, compression):
         temp = f'{ROOT_DIR}/temp/result.pdf'
 
         quality = {
@@ -66,14 +66,17 @@ class Main(QObject):
         with open(temp, 'wb') as stream:
             pdf_writer.write(stream)
 
-        import sys
-        import subprocess
-        subprocess.call(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4',
+        import locale
+        import ghostscript
+        args = ['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4',
                 '-dPDFSETTINGS={}'.format(quality[compression]),
                 '-dNOPAUSE', '-dQUIET', '-dBATCH',
-                '-sOutputFile={}'.format(remove_prefix(path)),
+                '-sOutputFile={}'.format(remove_prefix(filepath)),
                  temp
-                 ])
+                 ]
+        encoding = locale.getpreferredencoding()
+        args = [a.encode(encoding) for a in args]
+        ghostscript.Ghostscript(*args)
 
 
     @Slot(result=int)
@@ -91,26 +94,26 @@ class Main(QObject):
 
 
     @Slot(str, int, int, result=list)
-    def add_page(self, path, mode, index):
+    def add_page(self, filepath, mode, index):
         temp = f'{ROOT_DIR}/temp'
 
         if not path.exists(temp):
             makedirs(temp)
 
-        pdf = PdfFileReader(path)
+        pdf = PdfFileReader(remove_prefix(filepath))
 
         collection = []
 
         for p in range(pdf.numPages):
-            pdf = PdfFileReader(remove_prefix(path))   # This line is redundant, but prevents stream error
+            pdf = PdfFileReader(remove_prefix(filepath))   # This line is redundant, but prevents stream error
             pdf_writer = PdfFileWriter()
             page = pdf.getPage(p)
             page.compressContentStreams()
             pdf_writer.addPage(page)
-            _path = rf'{temp}/{self.doc_count}_page{p}.pdf'
-            with open(_path, 'wb') as stream:
+            _filepath = rf'{temp}/{self.doc_count}_page{p}.pdf'
+            with open(_filepath, 'wb') as stream:
                 pdf_writer.write(stream)
-            collection.append(_path)
+            collection.append(add_prefix(_filepath))
 
         if mode == 0:
             self.pages = collection + self.pages
@@ -136,12 +139,12 @@ class Main(QObject):
         if not path.exists(temp):
             makedirs(temp)
 
-        _path = rf'{temp}/img_{self.img_count}.pdf'
-        cv = canvas.Canvas(_path, pagesize=A4)
+        _filepath = rf'{temp}/img_{self.img_count}.pdf'
+        cv = canvas.Canvas(_filepath, pagesize=A4)
         cv.drawInlineImage(filepath, inch*.25, inch*2, width=595-(.5*inch), height=595-(.316*inch), preserveAspectRatio=True, anchor='c')
         cv.save()
 
-        img_path = add_prefix(_path)
+        img_path = add_prefix(_filepath)
         if mode == 0:
             self.pages.insert(0, img_path)
         elif mode == 1:
@@ -176,13 +179,13 @@ class Main(QObject):
         webbrowser.open(url)
 
 
-def add_prefix(path):
+def add_prefix(filepath):
     prefix = get_file_prefix()
-    return f'{prefix}/{path}'
+    return f'{prefix}{filepath}'
 
-def remove_prefix(path):
+def remove_prefix(filepath):
     prefix = get_file_prefix()
-    return path.replace(prefix, '')
+    return filepath.replace(prefix, '')
 
 def get_file_prefix():
     from sys import platform
