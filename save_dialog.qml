@@ -85,7 +85,10 @@ Window {
         selectExisting: false
 
         onAccepted: {
-            save_dialog.path = `${save_file_dialog.fileUrl}`;
+            var filepath = save_file_dialog.fileUrl.toString();
+            if (!filepath.endsWith('.pdf'))
+                filepath += '.pdf';
+            save_dialog.path = filepath;
             this.close();
         }
 

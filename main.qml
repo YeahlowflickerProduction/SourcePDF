@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 
 //  Main window
 ApplicationWindow {
-    property string app_version : "2021.D1.1.2"
+    property string app_version : "2021.D1.1.3"
 
     property int scale_percentage : 75
     property string current_file : ""
