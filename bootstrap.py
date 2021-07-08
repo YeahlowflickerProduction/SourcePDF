@@ -1,5 +1,6 @@
 import sys
 from PySide2.QtCore import Qt, QCoreApplication
+from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 from PySide2.QtQml import QQmlApplicationEngine
 from main import Main
@@ -16,6 +17,7 @@ if __name__ == "__main__":
     #   Define application
     app = QApplication(sys.argv)
     app.setOrganizationName("Yeahlowflicker Production")
+    app.setWindowIcon(QIcon(f'{ROOT_DIR}/sourcepdf_icon.ico'));
 
     #   Define engine
     from os.path import dirname, abspath
