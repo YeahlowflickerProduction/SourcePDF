@@ -7,6 +7,7 @@ import QtQuick.Dialogs 1.3
 //  Main window
 ApplicationWindow {
     property string app_version : "2021.D1.1.4"
+    property int moveSpeed: 50
 
     property int scale_percentage : 75
     property string current_file : ""
@@ -64,6 +65,7 @@ ApplicationWindow {
         Menu {
             title: "Help"
             Action { text: "About"; onTriggered: { triggerAbout() } }
+            Action { text: "Check for Updates"; onTriggered: { manager.open_url('https://yeahlowflicker.com/sourcepdf') } }
             Action { text: "View License"; onTriggered: { manager.open_url('https://yeahlowflicker.com/sourcepdf/licenses') } }
             Action { text: "Terms and Privacy"; onTriggered: { manager.open_url('https://yeahlowflicker.com/terms') } }
             Action { text: "Yeahlowflicker Production"; onTriggered: { manager.open_url('https://yeahlowflicker.com') } }
@@ -118,6 +120,37 @@ ApplicationWindow {
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.minimumSize: 0.1
 
+        focus: true
+        Keys.onUpPressed: { listview.contentY -= moveSpeed; listview.returnToBounds(); }
+        Keys.onDownPressed: { listview.contentY += moveSpeed; listview.returnToBounds(); }
+        Keys.onLeftPressed: { if (xPos > -100) xPos -= 10; listview.returnToBounds(); }
+        Keys.onRightPressed: { if (xPos < 100) xPos += 10; listview.returnToBounds(); }
+        Keys.onPressed: {
+            if (event.key == Qt.Key_Home) listview.positionViewAtBeginning();
+            if (event.key == Qt.Key_End) listview.positionViewAtEnd();
+            if (event.key == Qt.Key_PageUp) {
+                listview.contentY -= moveSpeed * 10; listview.returnToBounds();
+            }
+            if (event.key == Qt.Key_PageDown) {
+                listview.contentY += moveSpeed * 10; listview.returnToBounds();
+            }
+            if (event.modifiers == Qt.ControlModifier) {
+                if (event.key == Qt.Key_O) { pdfDialog.mode = 4; pdfDialog.open() }
+                if (event.key == Qt.Key_N) new_pdf();
+                if (event.key == Qt.Key_S) { if (has_pages()) triggerSaveDialog(true); }
+                if (event.key == Qt.Key_Q) exitApplication();
+            }
+            if (event.modifiers == Qt.ControlModifier + Qt.ShiftModifier && event.key == Qt.Key_S) {
+                if (has_pages()) triggerSaveDialog(false);
+            }
+
+            if (event.key == Qt.Key_Delete) {
+                var index = listview.currentIndex;
+                if (selected) removeCurrentPage();
+                listview.positionViewAtIndex(index, ListView.Beginning);
+            }
+        }
+
         ListView {
             id: listview
             anchors.fill: parent
@@ -133,11 +166,9 @@ ApplicationWindow {
 
             boundsBehavior: Flickable.StopAtBounds
 
-
             MouseArea {
                 anchors.fill: parent
                 propagateComposedEvents: true
-                property int moveSpeed: 50
 
                 onWheel: {
                     //  Horizontal scroll if shift modifiers. Very weird values but works
@@ -297,7 +328,7 @@ ApplicationWindow {
 
 
     function exitApplication() {
-        Qt.quit();
+        this.close();
     }
 
 
