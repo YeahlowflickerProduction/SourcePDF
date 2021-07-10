@@ -23,7 +23,7 @@ ApplicationWindow {
 
     id: root
     visible: true
-    title: "Source PDF  v" + app_version
+    title: "SourcePDF  v" + app_version
     color: "#242424"
 
     width: 1280
