@@ -2,6 +2,8 @@
 
 SourcePDF is a free PDF editor for Linux and Windows, written in Python and QML.
 
+Learn more: (https://yeahlowflicker.com/sourcepdf)
+
 ## Features
 - Merging Multiple Documents
 - Reordering/Removing Pages
@@ -17,4 +19,4 @@ SourcePDF is a free PDF editor for Linux and Windows, written in Python and QML.
 - [Py2exe](https://github.com/py2exe/py2exe)
 
 ## License
-This project is licensed under the GNU General Public License v3.0 (GPLv3) (see LICENSE.txt).
+This project is licensed under the GNU General Public License v3.0 (GPLv3) (see LICENSE).
