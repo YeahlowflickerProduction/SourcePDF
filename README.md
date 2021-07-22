@@ -41,5 +41,10 @@ Download the AppImage from our website and you are ready to use.
 
 
 
+## Tested Platforms
+- Windows 10
+- Ubuntu 18.04
+
+
 ## License
 This project is licensed under the GNU General Public License v3.0 (GPLv3) (see LICENSE).
