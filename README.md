@@ -38,6 +38,9 @@ Download the AppImage from our website and you are ready to use.
 - [PySide2](https://pypi.org/project/PySide2/)
 - [PyInstaller](https://github.com/pyinstaller/pyinstaller)
 - [Py2exe](https://github.com/py2exe/py2exe)
+- [PyPDF2](https://github.com/mstamy2/PyPDF2)
+- [PyPDF4](https://github.com/claird/PyPDF4)
+- [ReportLab](https://www.reportlab.com)
 
 
 
