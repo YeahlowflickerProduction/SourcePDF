@@ -1,10 +1,8 @@
 # SourcePDF
 
-SourcePDF is a free PDF editor for Linux and Windows, written in Python and QML. It is managed and owned by [Yeahlowflicker Production](https://yeahlowflicker.com).
+*Project is deprecated*
 
-[Download](https://yeahlowflicker.com/sourcepdf#section-download) | [Learn more](https://yeahlowflicker.com/sourcepdf)
-
-
+SourcePDF is a free PDF transformation tool for Linux and Windows, written in Python and QML.
 
 ## Installation
 
